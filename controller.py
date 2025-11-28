@@ -1,7 +1,6 @@
 from model import Model
 from view import View
 from tkinter import filedialog
-import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -14,6 +13,7 @@ class Controller:
         self.root.protocol("WM_DELETE_WINDOW", self.quit_app)
 
     def load_image(self):
+        self.model.clear()
         file_path = filedialog.askopenfilename(
             filetypes=[("Image files", "*.png;*.jpg;*.tif;*.tiff;*.bmp;*.jpeg")]
         )
@@ -32,7 +32,8 @@ class Controller:
         self.view.update_image(self.image, regions)
 
     def save_data(self):
-        self.model.save_data()
+        figure = self.view.get_figure()
+        self.model.save_data(figure)
     
     def quit_app(self):
         plt.close('all')

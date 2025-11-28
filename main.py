@@ -8,9 +8,9 @@
 from controller import Controller
 from model import Model
 from view import View
-import tkinter as tk
+import ttkbootstrap as ttk
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = ttk.Window(themename="sandstone")
     controller = Controller(root)
     root.mainloop()

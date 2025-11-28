@@ -2,22 +2,29 @@ from skimage import io
 import numpy as np
 from pathlib import Path as file_Path
 from matplotlib.path import Path
+import matplotlib.pyplot as plt
 import pandas as pd
 from tkinter import filedialog
+from matplotlib.patches import Polygon
 
 class Model:
     def __init__(self):
         self.regions = []
+        self.image = None
+
 
     def load_image(self, path):
         img = io.imread(path)
         if img.ndim == 3:
             if img.shape[2] == 4:
                 img = img[..., :3]
-            img = np.mean(img, axis=2)
-        self.image = img.astype(float)
+        self.image = img
         self.load_files(path)
         return self.image
+    
+    def clear(self):
+        self.regions = []
+        self.image = None
     
     def load_files(self, path):
         filepath = file_Path(path)
@@ -27,25 +34,25 @@ class Model:
 
         # Remove termination to get the common base prefix
         if stem.endswith('FAD_intensity_image'):
-            self.base_prefix = stem[:-20]
+            base_prefix = stem[:-20]
         elif stem.endswith('FAD_color_Image'):
-            self.base_prefix = stem[:-16]
+            base_prefix = stem[:-16]
         elif stem.endswith('NADH_intensity_image'):
-            self.base_prefix = stem[:-21]
+            base_prefix = stem[:-21]
         elif stem.endswith('NADH_color_Image'):
-           self.base_prefix = stem[:-17]    
+           base_prefix = stem[:-17]    
         else:
             raise ValueError("Filename does not follow expected pattern *_NADH_intensity_image.tif or *_NADH_color_Image.tif.")
         
         # Construct full paths to the other files
-        NADH_t1_path = self.folder / f"{self.base_prefix}_NADH_t1.asc"
-        NADH_a1_path = self.folder / f"{self.base_prefix}_NADH_a1.asc"
-        NADH_t2_path = self.folder / f"{self.base_prefix}_NADH_t2.asc"
-        NADH_a2_path = self.folder / f"{self.base_prefix}_NADH_a2.asc"
-        FAD_t1_path  = self.folder / f"{self.base_prefix}_FAD_t1.asc"
-        FAD_a1_path  = self.folder / f"{self.base_prefix}_FAD_a1.asc"
-        FAD_t2_path  = self.folder / f"{self.base_prefix}_FAD_t2.asc"
-        FAD_a2_path  = self.folder / f"{self.base_prefix}_FAD_a2.asc"
+        NADH_t1_path = self.folder / f"{base_prefix}_NADH_t1.asc"
+        NADH_a1_path = self.folder / f"{base_prefix}_NADH_a1.asc"
+        NADH_t2_path = self.folder / f"{base_prefix}_NADH_t2.asc"
+        NADH_a2_path = self.folder / f"{base_prefix}_NADH_a2.asc"
+        FAD_t1_path  = self.folder / f"{base_prefix}_FAD_t1.asc"
+        FAD_a1_path  = self.folder / f"{base_prefix}_FAD_a1.asc"
+        FAD_t2_path  = self.folder / f"{base_prefix}_FAD_t2.asc"
+        FAD_a2_path  = self.folder / f"{base_prefix}_FAD_a2.asc"
 
         self.NADH_t1 = np.loadtxt(NADH_t1_path)[::-1,::]
         self.NADH_t2 = np.loadtxt(NADH_t2_path)[::-1,::]
@@ -102,7 +109,7 @@ class Model:
         self.mask = path.contains_points(points).reshape((ny, nx))
         self.pixel_indices = np.argwhere(self.mask)
 
-    def save_data(self):
+    def save_data(self, figure):
         df = pd.DataFrame(self.processed_data)
 
         save_path = filedialog.asksaveasfilename(
@@ -112,6 +119,7 @@ class Model:
                 )
         if save_path:
             df.to_excel(save_path, index=False)
+            figure.savefig(save_path.split(".")[0]+".png")
             print(f"Data saved to {save_path}")
         else:
             print("Save canceled.")

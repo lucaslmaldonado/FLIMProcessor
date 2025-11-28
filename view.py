@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import messagebox, simpledialog, filedialog
+import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from polygon_selector import MyPolygonSelector
@@ -11,18 +12,19 @@ class View:
         self.controller = controller
         self.root.title("FLIMProcessor")
 
-        try:
-            self.root.state('zoomed')  # Works on Windows
-        except tk.TclError:
-            # Fallback for Linux/Mac
-            screen_width = self.root.winfo_screenwidth()
-            screen_height = self.root.winfo_screenheight()
-            self.root.geometry(f"{screen_width}x{screen_height}+0+0")
+        #try:
+        #    self.root.state('zoomed')  # Works on Windows
+        #except tk.TclError:
+        #    # Fallback for Linux/Mac
+        #    screen_width = self.root.winfo_screenwidth()
+        #    screen_height = self.root.winfo_screenheight()
+        #    self.root.geometry(f"{screen_width}x{screen_height}+0+0")
 
         self.fig, self.ax_img = plt.subplots(1, 1, figsize=(5, 5))
         self.fig.tight_layout()
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
-        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=1)
+        self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.pack(fill=tk.BOTH, expand=1)
         self.ax_img.set_xticks([])
         self.ax_img.set_yticks([])
 
@@ -32,24 +34,24 @@ class View:
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         # Add region button
-        self.new_region_button = tk.Button(self.root, text="New Region", command=self.controller.new_region)
+        self.new_region_button = ttk.Button(self.root, text="New Region", command=self.controller.new_region, bootstyle=PRIMARY)
         self.new_region_button.pack(side=tk.LEFT, fill=tk.X, padx=5)
         # Add analyze button
-        self.analyze_button = tk.Button(self.root, text="Process Region", command=self.controller.process_region)
+        self.analyze_button = ttk.Button(self.root, text="Process Region", command=self.controller.process_region, bootstyle=PRIMARY)
         self.analyze_button.pack(side=tk.LEFT, fill=tk.X, padx=5)
         # Add save button
-        self.save_button = tk.Button(self.root, text='Save', command=self.controller.save_data)
+        self.save_button = ttk.Button(self.root, text='Save', command=self.controller.save_data, bootstyle=SUCCESS)
         self.save_button.pack(side=tk.LEFT, fill=tk.X, padx=5)
 
         # Menu bar
-        self.menu_bar = tk.Menu(self.root)
+        self.menu_bar = ttk.Menu(self.root)
         # File cascade
-        self.file_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.file_menu = ttk.Menu(self.menu_bar, tearoff=0)
         self.menu_bar.add_cascade(label="File", menu=self.file_menu)
         self.file_menu.add_command(label="Open Image", command = self.controller.load_image)
         self.file_menu.add_command(label="Exit", command = self.controller.quit_app)
         # Settings cascade
-        self.settings_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.settings_menu = ttk.Menu(self.menu_bar, tearoff=0)
         self.menu_bar.add_cascade(label="Settings", menu=self.settings_menu)
 
         self.root.config(menu=self.menu_bar)
@@ -83,3 +85,6 @@ class View:
 
     def get_coords(self):
         return self.polygon_interactor.get_coords()
+    
+    def get_figure(self):
+        return self.fig
