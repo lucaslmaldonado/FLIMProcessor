@@ -2,16 +2,13 @@ from skimage import io
 import numpy as np
 from pathlib import Path as file_Path
 from matplotlib.path import Path
-import matplotlib.pyplot as plt
 import pandas as pd
 from tkinter import filedialog
-from matplotlib.patches import Polygon
 
 class Model:
     def __init__(self):
         self.regions = []
         self.image = None
-
 
     def load_image(self, path):
         img = io.imread(path)
